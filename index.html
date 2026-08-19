@@ -20,7 +20,7 @@
 <div class="container my-4">
     <div class="card shadow card-calculadora">
         
-        <!-- ENCABEZADO CON SELECTOR DE EMPRESA -->
+        <!-- ENCABEZADO CON SELECTOR DE EMPRESA ACTUALIZADO -->
         <div class="card-header header-seccion py-3">
             <div class="row align-items-center">
                 <div class="col-md-8 text-center text-md-start mb-2 mb-md-0">
@@ -29,9 +29,10 @@
                 </div>
                 <div class="col-md-4 text-center text-md-end">
                     <label class="form-label small fw-bold text-white mb-1 d-block">Empresa Emisora:</label>
+                    <!-- DOCUMENTACIÓN: Selector actualizado con el nombre completo de la empresa -->
                     <select id="selectEmpresa" class="form-select form-select-sm fw-bold shadow-sm" onchange="cambiarEmpresa()">
                         <option value="DISTINTA.COM" selected>DISTINTA.COM</option>
-                        <option value="LA CLAVIJA">LA CLAVIJA</option>
+                        <option value="LA CLAVIJA ELECTRODOMÉSTICOS">LA CLAVIJA ELECTRODOMÉSTICOS</option>
                     </select>
                 </div>
             </div>
@@ -128,7 +129,7 @@
                 </div>
             </div>
 
-            <!-- BOTONES DE ACCIÓN (WHATSAPP Y LIMPIEZA DE CAMPOS) -->
+            <!-- BOTONES DE ACCIÓN -->
             <div class="row g-2">
                 <div class="col-md-8">
                     <button class="btn btn-success w-100 fw-bold py-2 shadow-sm" onclick="enviarPropuestaWhatsApp()">
@@ -164,7 +165,6 @@
         document.getElementById("inputNombre").value = "";
         document.getElementById("inputArticulo").value = "";
         
-        // Asigna la fecha del día actual a las fechas por defecto
         const hoy = new Date();
         const año = hoy.getFullYear();
         const mes = String(hoy.getMonth() + 1).padStart(2, '0');
@@ -249,7 +249,7 @@
         return { porPagar, descuento, saldoNormal };
     }
 
-    // DOCUMENTACIÓN: Generador del mensaje con empresa dinámica
+    // DOCUMENTACIÓN: Generador del mensaje con el nombre comercial actualizado de la empresa
     function enviarPropuestaWhatsApp() {
         const empresa = document.getElementById("selectEmpresa").value;
         const folio = document.getElementById("inputFolio").value || "N/A";
