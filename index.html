@@ -8,17 +8,25 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; }
         .container { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         h2 { color: #2c3e50; border-bottom: 2px solid #34495e; padding-bottom: 10px; margin-top: 0; }
+        
+        /* Estilos para el nuevo Buscador y Módulo de Abonos */
+        .seccion-herramientas { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; background-color: #eef2f7; padding: 20px; border: 1px solid #d0d7de; border-radius: 6px; margin-bottom: 25px; }
+        .btn-accion { padding: 10px 15px; background-color: #3498db; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 5px; }
+        .btn-accion:hover { background-color: #2980b9; }
+        .btn-abono { background-color: #e67e22; }
+        .btn-abono:hover { background-color: #d35400; }
+
         .grid-manual { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; background-color: #fff5f5; padding: 20px; border: 1px solid #ffcccc; border-radius: 6px; margin-bottom: 25px; }
         .grid-automatico { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; background-color: #f0f9f4; padding: 20px; border: 1px solid #c2e0c6; border-radius: 6px; margin-bottom: 25px; }
         .form-group { display: flex; flex-direction: column; }
         label { font-weight: bold; margin-bottom: 5px; color: #34495e; font-size: 14px; }
         input { padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; }
         .manual-input { color: #d9534f; font-weight: bold; border-color: #f5c6cb; }
-        .auto-input { background-color: #eaedd5; color: #27ae60; font-weight: bold; border-color: #c3e6cb; }
-        .seccion-titulo { grid-column: span 2; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; margin: 0; }
+        .auto-input { background-color: #f8f9fa; color: #27ae60; font-weight: bold; border-color: #c3e6cb; }
+        .seccion-titulo { grid-column: span 2; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; margin: 0; color: #7f8c8d; }
         .titulo-rojo { color: #c0392b; }
         .titulo-verde { color: #27ae60; }
-        .btn-whatsapp { display: block; width: 100%; background-color: #25D366; color: white; border: none; padding: 15px; font-size: 18px; font-weight: bold; border-radius: 6px; cursor: pointer; text-align: center; text-decoration: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn-whatsapp { display: block; width: 100%; background-color: #25D366; color: white; border: none; padding: 15px; font-size: 18px; font-weight: bold; border-radius: 6px; cursor: pointer; text-align: center; text-decoration: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-top: 10px; }
         .btn-whatsapp:hover { background-color: #128C7E; }
     </style>
 </head>
@@ -28,75 +36,112 @@
     <h2>🔎 PANEL DE CONTROL - DESCUENTO POR PRONTO PAGO</h2>
     <p><i>Uso interno exclusivo para personal autorizado.</i></p>
 
-    <!-- Campos que se llenan a mano (Letras Rojas) -->
-    <div class="grid-manual">
-        <h3 class="seccion-titulo titulo-rojo">✍️ Introducción Manual (Datos del Crédito)</h3>
+    <!-- 🛠️ NUEVA SECCIÓN: BUSCADOR Y REGISTRO DE ABONOS -->
+    <div class="seccion-herramientas">
         <div class="form-group">
-            <label>Nombre del Cliente:</label>
-            <input type="text" class="manual-input" id="cliente" value="PATRICIA FERNANDEZ CASIMIRO">
+            <label for="buscarId">🔍 Buscar Crédito por ID:</label>
+            <input type="text" id="buscarId" placeholder="Ej: 580" style="border-color: #3498db;">
+            <button class="btn-accion" onclick="ejecutarBusqueda()">Cargar Datos de Cliente</button>
         </div>
         <div class="form-group">
-            <label>Fecha de Venta:</label>
-            <input type="date" class="manual-input" id="fechaVenta" value="2025-11-03">
-        </div>
-        <div class="form-group">
-            <label>Semanas Pactadas:</label>
-            <input type="number" class="manual-input" id="semanasPactadas" value="52">
-        </div>
-        <div class="form-group">
-            <label>Pago Semanal ($):</label>
-            <input type="number" class="manual-input" id="pagoSemanal" value="265">
-        </div>
-        <div class="form-group">
-            <label>Precio de Contado ($):</label>
-            <input type="number" class="manual-input" id="precioContado" value="8960">
-        </div>
-        <div class="form-group">
-            <label>Total Pagado a la Fecha ($):</label>
-            <input type="number" class="manual-input" id="pagadoAcumulado" value="12065">
+            <label for="montoAbono">💰 Registrar Abono al Historial ($):</label>
+            <input type="number" id="montoAbono" placeholder="Ej: 265.00" style="border-color: #e67e22;">
+            <button class="btn-accion btn-abono" onclick="ejecutarAbono()">Registrar Pago en Sistema</button>
         </div>
     </div>
 
-    <!-- Campos Calculados Automáticamente (Letras Verdes/Negras) -->
+    <!-- Campos de Entrada (Letras Rojas) -->
+    <div class="grid-manual">
+        <h3 class="seccion-titulo titulo-rojo">✍️ Información Base (Modificable)</h3>
+        <div class="form-group">
+            <label>Nombre del Cliente:</label>
+            <input type="text" class="manual-input" id="cliente" value="Esperando cliente...">
+        </div>
+        <div class="form-group">
+            <label>Fecha de Venta:</label>
+            <input type="date" class="manual-input" id="fechaVenta">
+        </div>
+        <div class="form-group">
+            <label>Semanas Pactadas:</label>
+            <input type="number" class="manual-input" id="semanasPactadas" value="0">
+        </div>
+        <div class="form-group">
+            <label>Pago Semanal ($):</label>
+            <input type="number" class="manual-input" id="pagoSemanal" value="0">
+        </div>
+        <div class="form-group">
+            <label>Precio de Contado ($):</label>
+            <input type="number" class="manual-input" id="precioContado" value="0">
+        </div>
+        <div class="form-group">
+            <label>Total Pagado Calculado ($):</label>
+            <input type="number" class="manual-input" id="pagadoAcumulado" value="0" readonly style="background-color: #f8d7da;">
+        </div>
+    </div>
+
+    <!-- Campos Calculados Automáticamente (Letras Verdes) -->
     <div class="grid-automatico">
-        <h3 class="seccion-titulo titulo-verde">🤖 Cálculos Automáticos del Sistema</h3>
+        <h3 class="seccion-titulo titulo-verde">🤖 Cálculos de Liquidación (Automáticos)</h3>
         <div class="form-group">
             <label>Semanas Transcurridas (Sáb-Jue):</label>
-            <input type="text" class="auto-input" id="calcSemanas" value="42" readonly>
+            <input type="text" class="auto-input" id="calcSemanas" readonly>
         </div>
         <div class="form-group">
             <label>Saldo Regular Restante ($):</label>
-            <input type="text" class="auto-input" id="calcSaldoRegular" value="1,715.00" readonly>
+            <input type="text" class="auto-input" id="calcSaldoRegular" readonly>
         </div>
         <div class="form-group">
             <label>Ahorro / Descuento Hoy ($):</label>
-            <input type="text" class="auto-input" id="calcDescuento" value="926.92" readonly>
+            <input type="text" class="auto-input" id="calcDescuento" readonly>
         </div>
         <div class="form-group">
             <label>MONTO NETO A PAGAR HOY ($):</label>
-            <input type="text" class="auto-input" id="calcNeto" value="788.08" style="font-size: 20px; border: 2px solid #27ae60;" readonly>
+            <input type="text" class="auto-input" id="calcNeto" style="font-size: 20px; border: 2px solid #27ae60; background-color: #e8f5e9;" readonly>
         </div>
     </div>
 
     <!-- Botón de Envío -->
-        <!-- Botón de Envío Corregido -->
     <button class="btn-whatsapp" onclick="enviarWhatsApp()">
         💬 Enviar Liquidación por WhatsApp
     </button>
 </div>
 
-<!-- Enlace al archivo de matemáticas -->
-<script apiKey: "AIzaSyBn6h16QGUr2NPJpS_wivgIYKI39HiqWKw",
-  authDomain: "descuento-por-pronto-pago.firebaseapp.com",
-  projectId: "descuento-por-pronto-pago",
-  storageBucket: "descuento-por-pronto-pago.firebasestorage.app",
-  messagingSenderId: "666425699990",
-  appId: "1:666425699990:web:5746c7a6e7a5b62ebf1cb7"
-</body>
-</html>
+<!-- Conexión directa con Firebase -->
+<script src="https://gstatic.com"></script>
+<script src="https://gstatic.com"></script>
 
-    </button>
-</div>
+<script>
+  // ⚠️ REEMPLAZA ESTE BLOQUE CON TUS LLAVES REALES DE FIREBASE CONSOLE:
+  const firebaseConfig = {
+    apiKey: "TU_API_KEY_REAL",
+    authDomain: "TU_AUTH_DOMAIN_REAL",
+    projectId: "TU_PROJECT_ID_REAL",
+    storageBucket: "TU_STORAGE_BUCKET_REAL",
+    messagingSenderId: "TU_MESSAGING_SENDER_ID_REAL",
+    appId: "TU_APP_ID_REAL"
+  };
 
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+</script>
+
+<!-- Enlace a las funciones auxiliares de control -->
+<script>
+  function ejecutarBusqueda() {
+      const id = document.getElementById('buscarId').value.trim();
+      if(id) { buscarClientePorId(id); } else { alert("Por favor escribe un ID válido."); }
+  }
+
+  function ejecutarAbono() {
+      const id = document.getElementById('buscarId').value.trim();
+      const monto = parseFloat(document.getElementById('montoAbono').value) || 0;
+      if(!id) { alert("Primero debes buscar un cliente por su ID."); return; }
+      if(monto <= 0) { alert("Escribe un monto de abono mayor a 0."); return; }
+      registrarAbonoManual(id, monto);
+      document.getElementById('montoAbono').value = ""; // Limpiar casilla
+  }
+</script>
+
+<script src="app.js"></script>
 </body>
 </html>
