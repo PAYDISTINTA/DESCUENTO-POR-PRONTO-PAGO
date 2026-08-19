@@ -3,168 +3,201 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Pronto Pago - DISTINTA.COM</title>
-    <!-- Bootstrap 5 para garantizar una interfaz moderna y adaptativa en celulares y computadoras -->
+    <title>Calculadora de Liquidación Anticipada - DISTINTA.COM</title>
+    <!-- Bootstrap 5 para diseño adaptativo en móviles y PC -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background-color: #f4f6f9; font-family: Arial, sans-serif; }
-        .card-calculadora { border-radius: 12px; border: none; }
-        .header-app { background-color: #0056b3; color: white; border-radius: 12px 12px 0 0; }
-        .caja-resultado { background-color: #e8f4ea; border: 1px solid #c3e6cb; border-radius: 8px; }
+        body { background-color: #eef2f7; font-family: Arial, sans-serif; }
+        .card-calculadora { border-radius: 10px; border: none; }
+        .header-seccion { background-color: #198754; color: white; border-radius: 10px 10px 0 0; }
+        .caja-resumen { background-color: #ffffff; border-radius: 8px; border: 1px solid #dee2e6; }
+        .texto-resaltado { color: #dc3545; font-weight: bold; }
+        .texto-exito { color: #198754; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="container my-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card shadow card-calculadora">
-                
-                <!-- Encabezado de la Aplicación -->
-                <div class="card-header header-app text-center py-3">
-                    <h3 class="fw-bold mb-0">DISTINTA.COM</h3>
-                    <small class="text-white-50">Herramienta Interna: Descuento por Pronto Pago</small>
+<div class="container my-4">
+    <div class="card shadow card-calculadora">
+        <div class="card-header header-seccion py-3 text-center">
+            <h3 class="fw-bold mb-0">DISTINTA.COM</h3>
+            <small>Módulo de Liquidación Anticipada y Descuento por Pronto Pago</small>
+        </div>
+        <div class="card-body p-4">
+            
+            <!-- DATOS DEL CLIENTE Y FECHAS -->
+            <div class="row g-3 mb-3">
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold">Folio Cliente</label>
+                    <input type="text" id="inputFolio" class="form-control" placeholder="Ej: 580" value="580" oninput="calcularLiquidacion()">
                 </div>
-
-                <div class="card-body p-4">
-                    <form id="formProntoPago" onsubmit="event.preventDefault();">
-                        
-                        <!-- Folio y Nombre del Cliente -->
-                        <div class="row g-2 mb-3">
-                            <div class="col-4">
-                                <label class="form-label small fw-bold">Folio / N°</label>
-                                <input type="text" id="inputFolio" class="form-control" placeholder="Ej: 123-D" oninput="calcularDescuento()">
-                            </div>
-                            <div class="col-8">
-                                <label class="form-label small fw-bold">Nombre del Cliente</label>
-                                <input type="text" id="inputNombre" class="form-control" placeholder="Nombre completo" oninput="calcularDescuento()">
-                            </div>
-                        </div>
-
-                        <!-- Importe Base -->
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold">Importe Original ($)</label>
-                            <input type="number" id="inputMontoOriginal" class="form-control form-control-lg fw-bold text-primary" placeholder="0.00" oninput="calcularDescuento()">
-                        </div>
-
-                        <!-- Tipo de Descuento y Valor -->
-                        <div class="row g-2 mb-3">
-                            <div class="col-6">
-                                <label class="form-label small fw-bold">Tipo de Descuento</label>
-                                <select id="selectTipoDescuento" class="form-select" onchange="calcularDescuento()">
-                                    <option value="porcentaje" selected>Porcentaje (%)</option>
-                                    <option value="monto">Monto Fijo ($)</option>
-                                </select>
-                            </div>
-                            <div class="col-6">
-                                <label class="form-label small fw-bold">Valor del Descuento</label>
-                                <input type="number" id="inputValorDescuento" class="form-control" placeholder="Ej: 10" oninput="calcularDescuento()">
-                            </div>
-                        </div>
-
-                        <!-- Fecha Límite de Pronto Pago -->
-                        <div class="mb-4">
-                            <label class="form-label small fw-bold">Fecha Límite de Aplicación</label>
-                            <input type="date" id="inputFechaLimite" class="form-control" onchange="calcularDescuento()">
-                        </div>
-
-                        <!-- Desglose de Resultados Financieros -->
-                        <div class="caja-resultado p-3 mb-4">
-                            <div class="row text-center">
-                                <div class="col-6 border-end">
-                                    <small class="text-muted fw-bold d-block">AHORRO DEL CLIENTE</small>
-                                    <span class="fs-4 fw-bold text-success" id="lblAhorro">$0.00</span>
-                                </div>
-                                <div class="col-6">
-                                    <small class="text-muted fw-bold d-block">PAGO CON DESCUENTO</small>
-                                    <span class="fs-4 fw-bold text-primary" id="lblTotalConDescuento">$0.00</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Botón para Enviar Cotización por WhatsApp -->
-                        <button type="button" class="btn btn-success w-100 fw-bold py-2 shadow-sm" onclick="enviarPropuestaWhatsApp()">
-                            💬 Enviar Propuesta por WhatsApp
-                        </button>
-
-                    </form>
+                <div class="col-md-5">
+                    <label class="form-label small fw-bold">Nombre del Cliente</label>
+                    <input type="text" id="inputNombre" class="form-control" placeholder="Nombre completo" value="PATRICIA FERNANDEZ CASIMIRO" oninput="calcularLiquidacion()">
                 </div>
-
+                <div class="col-md-4">
+                    <label class="form-label small fw-bold">Artículo / Concepto</label>
+                    <input type="text" id="inputArticulo" class="form-control" placeholder="Ej: Lavadora Mabe 22 KG" value="LAVADORA MABE DOBLE TINA 22 KG" oninput="calcularLiquidacion()">
+                </div>
             </div>
+
+            <div class="row g-3 mb-4 border-bottom pb-3">
+                <div class="col-md-4">
+                    <label class="form-label small fw-bold">Fecha de Venta</label>
+                    <input type="date" id="inputFechaVenta" class="form-control" value="2025-11-03" onchange="calcularSemanasYProcesar()">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-bold">Fecha de Descuento (Consulta)</label>
+                    <input type="date" id="inputFechaDescuento" class="form-control" value="2026-08-18" onchange="calcularSemanasYProcesar()">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-bold">Semanas Transcurridas</label>
+                    <input type="number" id="inputSemTranscurridas" class="form-control bg-warning-subtle fw-bold" value="42" oninput="calcularLiquidacion()">
+                </div>
+            </div>
+
+            <!-- VALORES FINANCIEROS Y PAGOS -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold">Plazo Tot. (Semanas)</label>
+                    <input type="number" id="inputSemanasTotales" class="form-control" value="52" oninput="calcularLiquidacion()">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold">Precio de Contado ($)</label>
+                    <input type="number" id="inputPrecioContado" class="form-control" value="8960" oninput="calcularLiquidacion()">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold">Precio Venta Crédito ($)</label>
+                    <input type="number" id="inputPrecioCredito" class="form-control" value="13780" oninput="calcularLiquidacion()">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold">Abonos Pagados ($)</label>
+                    <input type="number" id="inputPagado" class="form-control bg-warning-subtle fw-bold" value="12065" oninput="calcularLiquidacion()">
+                </div>
+            </div>
+
+            <!-- RESULTADOS Y DESGLOSE TIPO EXCEL -->
+            <div class="caja-resumen p-4 mb-4 shadow-sm">
+                <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">📊 Desglose de Liquidación Proporcional</h5>
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <small class="text-muted d-block">Financiamiento Total:</small>
+                        <span class="fs-6 fw-bold" id="lblFinanciamientoTotal">$0.00</span>
+                    </div>
+                    <div class="col-md-3">
+                        <small class="text-muted d-block">Financiamiento Semanal:</small>
+                        <span class="fs-6 fw-bold" id="lblFinanciamientoSemanal">$0.00</span>
+                    </div>
+                    <div class="col-md-3">
+                        <small class="text-muted d-block">Financiamiento Transcurrido:</small>
+                        <span class="fs-6 fw-bold" id="lblFinanciamientoTranscurrido">$0.00</span>
+                    </div>
+                    <div class="col-md-3">
+                        <small class="text-muted d-block">Monto Proporcional a la Fecha:</small>
+                        <span class="fs-6 fw-bold text-primary" id="lblTotalProporcional">$0.00</span>
+                    </div>
+                </div>
+                <hr>
+                <div class="row g-3 align-items-center text-center">
+                    <div class="col-md-4">
+                        <small class="text-muted fw-bold d-block">SALDO REGULAR</small>
+                        <span class="fs-4 texto-resaltado" id="lblSaldoNormal">$0.00</span>
+                    </div>
+                    <div class="col-md-4">
+                        <small class="text-muted fw-bold d-block">TOTAL A PAGAR HOY</small>
+                        <span class="fs-3 fw-bold text-primary" id="lblPorPagar">$0.00</span>
+                    </div>
+                    <div class="col-md-4">
+                        <small class="text-muted fw-bold d-block">DESCUENTO OTORGADO</small>
+                        <span class="fs-3 texto-exito" id="lblDescuento">$0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BOTÓN DE ENVÍO POR WHATSAPP -->
+            <button class="btn btn-success w-100 fw-bold py-2 shadow-sm" onclick="enviarPropuestaWhatsApp()">
+                💬 Enviar Propuesta por WhatsApp
+            </button>
+
         </div>
     </div>
 </div>
 
 <script>
-    // DOCUMENTACIÓN EDUCACIONAL: Función para formatear números en formato de moneda mexicana (MXN)
+    // Formateador de moneda MXN
     function formatearMoneda(cantidad) {
         return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(cantidad);
     }
 
-    // DOCUMENTACIÓN EDUCACIONAL: Función principal de cálculo dinámico
-    function calcularDescuento() {
-        // Explicación de Variables:
-        // Obtención de los valores del DOM convertidos a números flotantes
-        const montoOriginal = parseFloat(document.getElementById("inputMontoOriginal").value) || 0;
-        const tipoDescuento = document.getElementById("selectTipoDescuento").value;
-        const valorDescuento = parseFloat(document.getElementById("inputValorDescuento").value) || 0;
+    // Calcular las semanas transcurridas entre las dos fechas
+    function calcularSemanasYProcesar() {
+        const fechaVentaStr = document.getElementById("inputFechaVenta").value;
+        const fechaDescuentoStr = document.getElementById("inputFechaDescuento").value;
 
-        let ahorro = 0;
-        let totalFinal = montoOriginal;
-
-        // Lógica de Negocio: Evalúa el tipo de descuento seleccionado
-        if (tipoDescuento === "porcentaje") {
-            ahorro = montoOriginal * (valorDescuento / 100);
-        } else if (tipoDescuento === "monto") {
-            ahorro = valorDescuento;
+        if (fechaVentaStr && fechaDescuentoStr) {
+            const fechaVenta = new Date(fechaVentaStr);
+            const fechaDescuento = new Date(fechaDescuentoStr);
+            const diferenciaMs = fechaDescuento - fechaVenta;
+            
+            if (diferenciaMs > 0) {
+                const dias = diferenciaMs / (1000 * 60 * 60 * 24);
+                const semanas = Math.round(dias / 7);
+                document.getElementById("inputSemTranscurridas").value = semanas;
+            }
         }
-
-        // Validación para evitar que el ahorro supere el monto original
-        if (ahorro > montoOriginal) ahorro = montoOriginal;
-
-        totalFinal = montoOriginal - ahorro;
-
-        // Actualización de los elementos de texto en la pantalla (DOM)
-        document.getElementById("lblAhorro").innerText = formatearMoneda(ahorro);
-        document.getElementById("lblTotalConDescuento").innerText = formatearMoneda(totalFinal);
-
-        return { montoOriginal, ahorro, totalFinal };
+        calcularLiquidacion();
     }
 
-    // DOCUMENTACIÓN EDUCACIONAL: Función de integración con la API de WhatsApp
+    // Motor de cálculo que replica exactamente tu hoja de cálculo
+    function calcularLiquidacion() {
+        const semanasTotales = parseFloat(document.getElementById("inputSemanasTotales").value) || 1;
+        const precioContado = parseFloat(document.getElementById("inputPrecioContado").value) || 0;
+        const precioCredito = parseFloat(document.getElementById("inputPrecioCredito").value) || 0;
+        const semTranscurridas = parseFloat(document.getElementById("inputSemTranscurridas").value) || 0;
+        const pagado = parseFloat(document.getElementById("inputPagado").value) || 0;
+
+        // Fórmulas financieras exactas de tu Excel
+        const financiamientoTotal = precioCredito - precioContado;
+        const finaSemanal = financiamientoTotal / semanasTotales;
+        const financiamientoTranscurrido = semTranscurridas * finaSemanal;
+        const totalProporcional = precioContado + financiamientoTranscurrido;
+        
+        const saldoNormal = precioCredito - pagado;
+        const porPagar = totalProporcional - pagado;
+        const descuento = saldoNormal - porPagar;
+
+        // Renderizado de valores en pantalla (DOM)
+        document.getElementById("lblFinanciamientoTotal").innerText = formatearMoneda(financiamientoTotal);
+        document.getElementById("lblFinanciamientoSemanal").innerText = formatearMoneda(finaSemanal);
+        document.getElementById("lblFinanciamientoTranscurrido").innerText = formatearMoneda(financiamientoTranscurrido);
+        document.getElementById("lblTotalProporcional").innerText = formatearMoneda(totalProporcional);
+
+        document.getElementById("lblSaldoNormal").innerText = formatearMoneda(saldoNormal);
+        document.getElementById("lblPorPagar").innerText = formatearMoneda(porPagar);
+        document.getElementById("lblDescuento").innerText = formatearMoneda(descuento);
+
+        return { porPagar, descuento, saldoNormal };
+    }
+
+    // Generador del mensaje de WhatsApp
     function enviarPropuestaWhatsApp() {
         const folio = document.getElementById("inputFolio").value || "N/A";
         const nombre = document.getElementById("inputNombre").value || "Cliente";
-        const fechaLimite = document.getElementById("inputFechaLimite").value;
-        
-        // Ejecuta el cálculo para obtener las cifras actualizadas
-        const { montoOriginal, ahorro, totalFinal } = calcularDescuento();
+        const articulo = document.getElementById("inputArticulo").value || "Artículo";
+        const { porPagar, descuento, saldoNormal } = calcularLiquidacion();
 
-        if (montoOriginal <= 0) {
-            alert("Por favor ingresa un importe original válido.");
-            return;
-        }
-
-        // Formateo de fecha para mostrar día/mes/año al cliente
-        let fechaTexto = "próximamente";
-        if (fechaLimite) {
-            const partes = fechaLimite.split("-");
-            fechaTexto = `${partes[2]}/${partes[1]}/${partes[0]}`;
-        }
-
-        // Construcción de la plantilla de mensaje corporativo
         const mensaje = `Hola *${nombre}*, te saludamos de *DISTINTA.COM*.\n\n` +
-                        `Tenemos una excelente noticia respecto a tu crédito *N° ${folio}*:\n\n` +
-                        `🔹 *Importe regular:* ${formatearMoneda(montoOriginal)}\n` +
-                        `🎉 *Ahorro por pronto pago:* ${formatearMoneda(ahorro)}\n` +
-                        `✅ *Total a pagar con beneficio:* ${formatearMoneda(totalFinal)}\n\n` +
-                        `📅 *Vigencia:* Realizando tu pago a más tardar el *${fechaTexto}*.\n\n` +
-                        `¿Te gustaría aprovechar esta promoción? Quedamos a tus órdenes.`;
+                        `Revisamos tu crédito *N° ${folio}* por el artículo *${articulo}*:\n\n` +
+                        `🔹 *Saldo normal a la fecha:* ${formatearMoneda(saldoNormal)}\n` +
+                        `🎉 *Descuento por liquidación anticipada:* ${formatearMoneda(descuento)}\n` +
+                        `✅ *Monto único para liquidar hoy:* ${formatearMoneda(porPagar)}\n\n` +
+                        `¿Te gustaría aprovechar este beneficio para saldar tu cuenta? Quedamos a tus órdenes.`;
 
-        // Apertura de la API de WhatsApp
-        const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`;
-        window.open(url, '_blank');
+        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`, '_blank');
     }
+
+    // Ejecutar cálculo inicial al cargar la página
+    window.onload = calcularLiquidacion;
 </script>
 
 </body>
