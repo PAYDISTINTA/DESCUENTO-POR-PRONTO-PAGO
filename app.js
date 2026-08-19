@@ -1,32 +1,84 @@
-// --- 1. MOTOR DE TIEMPO: CICLO SÁBADO A JUEVES ---
+// --- 1. BUSCAR CLIENTE EN FIREBASE AUTOMÁTICAMENTE ---
+async function buscarClientePorId(idInput) {
+    if (!idInput) return;
+    
+    try {
+        // Consulta directa a la base de datos de Firebase
+        const docRef = db.collection('creditos').doc(`credito_${idInput}`);
+        const doc = await docRef.get();
+        
+        if (doc.exists) {
+            const datos = doc.data();
+            
+            // Llenar los campos manuales automáticamente con lo guardado en Firebase
+            document.getElementById('cliente').value = datos.nombre_cliente;
+            document.getElementById('fechaVenta').value = datos.fecha_venta;
+            document.getElementById('semanasPactadas').value = datos.semanas_pactadas;
+            document.getElementById('pagoSemanal').value = datos.pago_semanal;
+            document.getElementById('precioContado').value = datos.precio_contado;
+            
+            // Consultar la subcolección del historial de abonos para sumar el acumulado
+            const snapshotAbonos = await docRef.collection('historial_abonos').get();
+            let totalAbonado = 0;
+            snapshotAbonos.forEach(abono => {
+                totalAbonado += parseFloat(abono.data().monto) || 0;
+            });
+            
+            document.getElementById('pagadoAcumulado').value = totalAbonado;
+            
+            // Ejecutar las matemáticas operativas
+            procesarCalculosAutomaticos();
+        } else {
+            alert("El ID de crédito no existe en el sistema.");
+        }
+    } catch (error) {
+        console.error("Error al conectar con Firebase: ", error);
+    }
+}
+
+// --- 2. REGISTRAR UN ABONO MANUAL EN EL HISTORIAL ---
+async function registrarAbonoManual(idInput, montoAbono) {
+    if (!idInput || montoAbono <= 0) return;
+    
+    try {
+        const docRef = db.collection('creditos').doc(`credito_${idInput}`);
+        
+        // Guardar el abono de forma independiente en la subcolección
+        await docRef.collection('historial_abonos').add({
+            monto: parseFloat(montoAbono),
+            fecha_pago: new Date().toISOString(), // Marca de tiempo real exacta
+            registrado_por: "Personal Autorizado"
+        });
+        
+        alert("Abono registrado exitosamente en el historial.");
+        // Recargar la pantalla con el nuevo saldo acumulado
+        buscarClientePorId(idInput);
+    } catch (error) {
+        alert("Error al registrar el abono.");
+    }
+}
+
+// --- 3. MOTOR DE TIEMPO (SÁBADO A JUEVES) ---
 function calcularSemanasNegocio(fechaVentaStr, fechaPagoStr) {
     let venta = new Date(fechaVentaStr + "T00:00:00");
     let pago = new Date(fechaPagoStr + "T00:00:00");
 
-    // REGLA: Si se paga en Viernes (día 5), se pasa al Sábado (día 6) siguiente
-    if (pago.getDay() === 5) {
-        pago.setDate(pago.getDate() + 1);
-    }
+    if (pago.getDay() === 5) { pago.setDate(pago.getDate() + 1); }
 
-    // Encontrar el Sábado anterior o igual a la fecha de venta
     let sabadoOrigen = new Date(venta);
     let diaSemanaVenta = venta.getDay(); 
     let diasRestar = (diaSemanaVenta === 6) ? 0 : (diaSemanaVenta + 1);
     sabadoOrigen.setDate(sabadoOrigen.getDate() - diasRestar);
 
-    // Diferencia en días naturales
     const diffTiempo = pago - sabadoOrigen;
     const diffDias = Math.floor(diffTiempo / (1000 * 60 * 60 * 24));
-
-    // Cada bloque de 7 días cuenta como semana transcurrida (Inicia en Semana 1)
     let semanasTranscurridas = Math.floor(diffDias / 7) + 1;
 
     return semanasTranscurridas < 1 ? 1 : semanasTranscurridas;
 }
 
-// --- 2. MOTOR FINANCIERO: CÁLCULO DE SALDOS Y DESCUENTOS ---
+// --- 4. MOTOR FINANCIERO ---
 function procesarCalculosAutomaticos() {
-    // Capturar los valores manuales (Rojos) de la pantalla
     const cliente = document.getElementById('cliente').value;
     const fechaVentaStr = document.getElementById('fechaVenta').value;
     const semanasPactadas = parseInt(document.getElementById('semanasPactadas').value) || 0;
@@ -34,15 +86,12 @@ function procesarCalculosAutomaticos() {
     const precioContado = parseFloat(document.getElementById('precioContado').value) || 0;
     const pagadoAcumulado = parseFloat(document.getElementById('pagadoAcumulado').value) || 0;
 
-    if (!fechaVentaStr || semanasPactadas <= 0 || pagoSemanal <= 0) return;
+    if (!fechaVentaStr || semanasPactadas <= 0) return;
 
-    // Obtener la fecha del día de hoy en formato AAAA-MM-DD automáticamente
+    // Capturar fecha de hoy en huso horario de México automáticamente ('2026-08-18')
     const hoyStr = new Date().toISOString().split('T')[0];
-
-    // Ejecutar cálculo de tiempo
     const semanasTranscurridas = calcularSemanasNegocio(fechaVentaStr, hoyStr);
 
-    // Ejecutar fórmulas del Excel
     const totalCredito = semanasPactadas * pagoSemanal;
     const financiamientoTotal = totalCredito - precioContado;
     const saldoRegular = totalCredito - pagadoAcumulado;
@@ -53,21 +102,17 @@ function procesarCalculosAutomaticos() {
     const montoTeoricoAFecha = precioContado + financiamientoDevengado;
     let porPagarNeto = montoTeoricoAFecha - pagadoAcumulado;
 
-    // Evitar saldos negativos
     if (porPagarNeto < 0) porPagarNeto = 0;
-
     const descuentoOtorgado = saldoRegular - porPagarNeto;
 
-    // --- 3. MOSTRAR RESULTADOS EN PANTALLA ---
+    // Reflejar en pantalla de forma automática
     document.getElementById('calcSemanas').value = semanasTranscurridas;
-    document.getElementById('calcSaldoRegular').value = saldoRegular.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    document.getElementById('calcDescuento').value = descuentoOtorgado.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    document.getElementById('calcNeto').value = porPagarNeto.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    document.getElementById('calcSaldoRegular').value = saldoRegular.toFixed(2);
+    document.getElementById('calcDescuento').value = descuentoOtorgado.toFixed(2);
+    document.getElementById('calcNeto').value = porPagarNeto.toFixed(2);
 
-    // Guardar temporalmente los datos para el botón de WhatsApp
     window.datosActuales = {
         cliente: cliente,
-        idFactura: "CR-580", // Temporal simulado
         saldoRegular: saldoRegular,
         descuento: descuentoOtorgado,
         neto: porPagarNeto,
@@ -75,7 +120,7 @@ function procesarCalculosAutomaticos() {
     };
 }
 
-// --- 4. INTEGRACIÓN AUTOMÁTICA CON WHATSAPP ---
+// --- 5. ENVIAR A WHATSAPP ---
 function enviarWhatsApp() {
     if (!window.datosActuales) return;
     const d = window.datosActuales;
@@ -89,17 +134,13 @@ function enviarWhatsApp() {
                     `_*Este beneficio es válido únicamente realizando su pago el día de hoy, ya que el descuento varía de forma semanal según el tiempo transcurrido._\n\n` +
                     `Si desea aprovecharlo, por favor respóndanos este mensaje. ¡Muchas gracias!`;
 
-    const url = `https://wa.me{encodeURIComponent(mensaje)}`;
-    window.open(url, '_blank');
+    window.open(`https://wa.me{encodeURIComponent(mensaje)}`, '_blank');
 }
 
-// --- 5. ESCUCHAR CAMBIOS EN LA PANTALLA ---
-// Ejecutar cálculos en cuanto la pantalla cargue y cada vez que se modifique una celda roja
+// Escuchar eventos en pantalla
 document.addEventListener('DOMContentLoaded', () => {
     procesarCalculosAutomaticos();
-    
-    const inputsManuales = document.querySelectorAll('.manual-input');
-    inputsManuales.forEach(input => {
+    document.querySelectorAll('.manual-input').forEach(input => {
         input.addEventListener('input', procesarCalculosAutomaticos);
     });
 });
