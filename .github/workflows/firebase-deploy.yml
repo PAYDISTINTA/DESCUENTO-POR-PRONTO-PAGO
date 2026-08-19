@@ -1,0 +1,19 @@
+name: Despliegue Automático a Firebase
+on:
+  push:
+    branches:
+      - main # Se activa cada vez que guardas un cambio en GitHub
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar Código desde GitHub
+        uses: actions/checkout@v4
+
+      - name: Publicar en Firebase Console
+        uses: w9jds/firebase-action@master
+        with:
+          args: deploy --only hosting
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
