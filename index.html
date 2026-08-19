@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Liquidación Anticipada - DISTINTA.COM</title>
+    <title>Calculadora de Liquidación Anticipada</title>
     <!-- Bootstrap 5 para diseño adaptativo en móviles y PC -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
@@ -19,10 +19,24 @@
 
 <div class="container my-4">
     <div class="card shadow card-calculadora">
-        <div class="card-header header-seccion py-3 text-center">
-            <h3 class="fw-bold mb-0">DISTINTA.COM</h3>
-            <small>Módulo de Liquidación Anticipada (Ciclo Sábado a Jueves)</small>
+        
+        <!-- ENCABEZADO CON SELECTOR DE EMPRESA -->
+        <div class="card-header header-seccion py-3">
+            <div class="row align-items-center">
+                <div class="col-md-8 text-center text-md-start mb-2 mb-md-0">
+                    <h3 class="fw-bold mb-0" id="lblNombreEmpresaHeader">DISTINTA.COM</h3>
+                    <small>Módulo de Liquidación Anticipada (Ciclo Sábado a Jueves)</small>
+                </div>
+                <div class="col-md-4 text-center text-md-end">
+                    <label class="form-label small fw-bold text-white mb-1 d-block">Empresa Emisora:</label>
+                    <select id="selectEmpresa" class="form-select form-select-sm fw-bold shadow-sm" onchange="cambiarEmpresa()">
+                        <option value="DISTINTA.COM" selected>DISTINTA.COM</option>
+                        <option value="LA CLAVIJA">LA CLAVIJA</option>
+                    </select>
+                </div>
+            </div>
         </div>
+
         <div class="card-body p-4">
             
             <!-- DATOS DEL CLIENTE Y FECHAS -->
@@ -76,7 +90,7 @@
                 </div>
             </div>
 
-            <!-- RESULTADOS Y DESGLOSE TIPO EXCEL -->
+            <!-- RESULTADOS Y DESGLOSE -->
             <div class="caja-resumen p-4 mb-4 shadow-sm">
                 <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">📊 Desglose de Liquidación Proporcional</h5>
                 <div class="row g-3">
@@ -114,28 +128,67 @@
                 </div>
             </div>
 
-            <!-- BOTÓN DE ENVÍO POR WHATSAPP -->
-            <button class="btn btn-success w-100 fw-bold py-2 shadow-sm" onclick="enviarPropuestaWhatsApp()">
-                💬 Enviar Propuesta por WhatsApp
-            </button>
+            <!-- BOTONES DE ACCIÓN (WHATSAPP Y LIMPIEZA DE CAMPOS) -->
+            <div class="row g-2">
+                <div class="col-md-8">
+                    <button class="btn btn-success w-100 fw-bold py-2 shadow-sm" onclick="enviarPropuestaWhatsApp()">
+                        💬 Enviar Propuesta por WhatsApp
+                    </button>
+                </div>
+                <div class="col-md-4">
+                    <button class="btn btn-outline-secondary w-100 fw-bold py-2 shadow-sm" onclick="limpiarFormulario()">
+                        🔄 Limpiar Campos
+                    </button>
+                </div>
+            </div>
 
         </div>
     </div>
 </div>
 
 <script>
-    // DOCUMENTACIÓN: Formateador de valores numéricos a formato de moneda (MXN)
+    // DOCUMENTACIÓN: Formateador de moneda MXN
     function formatearMoneda(cantidad) {
         return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(cantidad);
     }
 
-    // DOCUMENTACIÓN: Algoritmo para calcular semanas transcurridas basadas en el ciclo Sábado - Jueves
+    // DOCUMENTACIÓN: Actualiza el título del encabezado según la empresa elegida
+    function cambiarEmpresa() {
+        const empresa = document.getElementById("selectEmpresa").value;
+        document.getElementById("lblNombreEmpresaHeader").innerText = empresa;
+    }
+
+    // DOCUMENTACIÓN: Reinicia los campos a cero para una nueva captura limpia
+    function limpiarFormulario() {
+        document.getElementById("inputFolio").value = "";
+        document.getElementById("inputNombre").value = "";
+        document.getElementById("inputArticulo").value = "";
+        
+        // Asigna la fecha del día actual a las fechas por defecto
+        const hoy = new Date();
+        const año = hoy.getFullYear();
+        const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+        const dia = String(hoy.getDate()).padStart(2, '0');
+        const fechaHoy = `${año}-${mes}-${dia}`;
+
+        document.getElementById("inputFechaVenta").value = fechaHoy;
+        document.getElementById("inputFechaDescuento").value = fechaHoy;
+        document.getElementById("inputSemTranscurridas").value = 0;
+
+        document.getElementById("inputSemanasTotales").value = "";
+        document.getElementById("inputPrecioContado").value = "";
+        document.getElementById("inputPrecioCredito").value = "";
+        document.getElementById("inputPagado").value = "";
+
+        calcularLiquidacion();
+    }
+
+    // DOCUMENTACIÓN: Algoritmo de cálculo de semanas basado en el ciclo Sábado - Jueves
     function calcularSemanasSabadoJueves() {
         const fechaVentaStr = document.getElementById("inputFechaVenta").value;
         const fechaDescuentoStr = document.getElementById("inputFechaDescuento").value;
 
         if (fechaVentaStr && fechaDescuentoStr) {
-            // Conversión de cadenas YYYY-MM-DD a objetos Date en hora local
             const [y1, m1, d1] = fechaVentaStr.split('-').map(Number);
             const [y2, m2, d2] = fechaDescuentoStr.split('-').map(Number);
 
@@ -143,27 +196,22 @@
             const fDescuento = new Date(y2, m2 - 1, d2);
 
             if (fDescuento >= fVenta) {
-                // Cálculo del Sábado donde inició el ciclo de la Venta
-                // En JS: 0=Dom, 1=Lun, 2=Mar, 3=Mié, 4=Jue, 5=Vie, 6=Sáb
                 const diaSemanaVenta = fVenta.getDay();
                 const diasHastaSabadoAnterior = (diaSemanaVenta + 1) % 7;
                 
                 const primerSabado = new Date(fVenta);
                 primerSabado.setDate(fVenta.getDate() - diasHastaSabadoAnterior);
 
-                // Cálculo del Sábado base de la Fecha de Consulta
                 const diaSemanaDesc = fDescuento.getDay();
                 const diasHastaSabadoDesc = (diaSemanaDesc + 1) % 7;
                 
                 const sabadoDescuento = new Date(fDescuento);
                 sabadoDescuento.setDate(fDescuento.getDate() - diasHastaSabadoDesc);
 
-                // Diferencia en milisegundos convertida a semanas
                 const diffTiempo = sabadoDescuento.getTime() - primerSabado.getTime();
                 const diffDias = Math.floor(diffTiempo / (1000 * 60 * 60 * 24));
                 const semanasTranscurridas = Math.floor(diffDias / 7) + 1;
 
-                // Asignación automática al campo de entrada
                 document.getElementById("inputSemTranscurridas").value = semanasTranscurridas;
             } else {
                 document.getElementById("inputSemTranscurridas").value = 0;
@@ -172,7 +220,7 @@
         calcularLiquidacion();
     }
 
-    // DOCUMENTACIÓN: Motor de cálculo que procesa la liquidación anticipada
+    // DOCUMENTACIÓN: Motor financiero que ejecuta las fórmulas proporcionales
     function calcularLiquidacion() {
         const semanasTotales = parseFloat(document.getElementById("inputSemanasTotales").value) || 1;
         const precioContado = parseFloat(document.getElementById("inputPrecioContado").value) || 0;
@@ -180,7 +228,6 @@
         const semTranscurridas = parseFloat(document.getElementById("inputSemTranscurridas").value) || 0;
         const pagado = parseFloat(document.getElementById("inputPagado").value) || 0;
 
-        // Fórmulas de la hoja de cálculo
         const financiamientoTotal = precioCredito - precioContado;
         const finaSemanal = financiamientoTotal / semanasTotales;
         const financiamientoTranscurrido = semTranscurridas * finaSemanal;
@@ -190,7 +237,6 @@
         const porPagar = totalProporcional - pagado;
         const descuento = saldoNormal - porPagar;
 
-        // Inyección de resultados en el DOM
         document.getElementById("lblFinanciamientoTotal").innerText = formatearMoneda(financiamientoTotal);
         document.getElementById("lblFinanciamientoSemanal").innerText = formatearMoneda(finaSemanal);
         document.getElementById("lblFinanciamientoTranscurrido").innerText = formatearMoneda(financiamientoTranscurrido);
@@ -203,14 +249,15 @@
         return { porPagar, descuento, saldoNormal };
     }
 
-    // DOCUMENTACIÓN: Construcción e integración con WhatsApp
+    // DOCUMENTACIÓN: Generador del mensaje con empresa dinámica
     function enviarPropuestaWhatsApp() {
+        const empresa = document.getElementById("selectEmpresa").value;
         const folio = document.getElementById("inputFolio").value || "N/A";
         const nombre = document.getElementById("inputNombre").value || "Cliente";
         const articulo = document.getElementById("inputArticulo").value || "Artículo";
         const { porPagar, descuento, saldoNormal } = calcularLiquidacion();
 
-        const mensaje = `Hola *${nombre}*, te saludamos de *DISTINTA.COM*.\n\n` +
+        const mensaje = `Hola *${nombre}*, te saludamos de *${empresa}*.\n\n` +
                         `Revisamos tu crédito *N° ${folio}* por el artículo *${articulo}*:\n\n` +
                         `🔹 *Saldo normal a la fecha:* ${formatearMoneda(saldoNormal)}\n` +
                         `🎉 *Descuento por liquidación anticipada:* ${formatearMoneda(descuento)}\n` +
@@ -220,7 +267,7 @@
         window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`, '_blank');
     }
 
-    // Inicialización al cargar el DOM
+    // Inicialización al cargar la página
     window.onload = function() {
         calcularSemanasSabadoJueves();
     };
