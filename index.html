@@ -20,7 +20,7 @@
 <div class="container my-4">
     <div class="card shadow card-calculadora">
         
-        <!-- ENCABEZADO CON SELECTOR DE EMPRESA ACTUALIZADO -->
+        <!-- ENCABEZADO CON SELECTOR DE EMPRESA -->
         <div class="card-header header-seccion py-3">
             <div class="row align-items-center">
                 <div class="col-md-8 text-center text-md-start mb-2 mb-md-0">
@@ -29,7 +29,6 @@
                 </div>
                 <div class="col-md-4 text-center text-md-end">
                     <label class="form-label small fw-bold text-white mb-1 d-block">Empresa Emisora:</label>
-                    <!-- DOCUMENTACIÓN: Selector actualizado con el nombre completo de la empresa -->
                     <select id="selectEmpresa" class="form-select form-select-sm fw-bold shadow-sm" onchange="cambiarEmpresa()">
                         <option value="DISTINTA.COM" selected>DISTINTA.COM</option>
                         <option value="LA CLAVIJA ELECTRODOMÉSTICOS">LA CLAVIJA ELECTRODOMÉSTICOS</option>
@@ -91,7 +90,7 @@
                 </div>
             </div>
 
-            <!-- RESULTADOS Y DESGLOSE -->
+            <!-- RESULTADOS Y DESGLOSE (CANTIDADES REDONDEADAS A $5 / $0) -->
             <div class="caja-resumen p-4 mb-4 shadow-sm">
                 <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">📊 Desglose de Liquidación Proporcional</h5>
                 <div class="row g-3">
@@ -148,9 +147,14 @@
 </div>
 
 <script>
-    // DOCUMENTACIÓN: Formateador de moneda MXN
+    // DOCUMENTACIÓN: Función para redondear un número al múltiplo de $5 más cercano
+    function redondearA5(numero) {
+        return Math.round(numero / 5) * 5;
+    }
+
+    // DOCUMENTACIÓN: Formateador de moneda MXN sin fracciones
     function formatearMoneda(cantidad) {
-        return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(cantidad);
+        return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(cantidad);
     }
 
     // DOCUMENTACIÓN: Actualiza el título del encabezado según la empresa elegida
@@ -220,7 +224,7 @@
         calcularLiquidacion();
     }
 
-    // DOCUMENTACIÓN: Motor financiero que ejecuta las fórmulas proporcionales
+    // DOCUMENTACIÓN: Motor financiero con redondeo a múltiplos de $5
     function calcularLiquidacion() {
         const semanasTotales = parseFloat(document.getElementById("inputSemanasTotales").value) || 1;
         const precioContado = parseFloat(document.getElementById("inputPrecioContado").value) || 0;
@@ -228,15 +232,27 @@
         const semTranscurridas = parseFloat(document.getElementById("inputSemTranscurridas").value) || 0;
         const pagado = parseFloat(document.getElementById("inputPagado").value) || 0;
 
-        const financiamientoTotal = precioCredito - precioContado;
-        const finaSemanal = financiamientoTotal / semanasTotales;
-        const financiamientoTranscurrido = semTranscurridas * finaSemanal;
-        const totalProporcional = precioContado + financiamientoTranscurrido;
+        // Cálculos base sin redondear para mantener la precisión intermedia
+        const financiamientoTotalBruto = precioCredito - precioContado;
+        const finaSemanalBruta = financiamientoTotalBruto / semanasTotales;
+        const financiamientoTranscurridoBruto = semTranscurridas * finaSemanalBruta;
+        const totalProporcionalBruto = precioContado + financiamientoTranscurridoBruto;
         
-        const saldoNormal = precioCredito - pagado;
-        const porPagar = totalProporcional - pagado;
-        const descuento = saldoNormal - porPagar;
+        const saldoNormalBruto = precioCredito - pagado;
+        const porPagarBruto = totalProporcionalBruto - pagado;
+        const descuentoBruto = saldoNormalBruto - porPagarBruto;
 
+        // Aplicación de la función redondearA5 a todas las variables de salida
+        const financiamientoTotal = redondearA5(financiamientoTotalBruto);
+        const finaSemanal = redondearA5(finaSemanalBruta);
+        const financiamientoTranscurrido = redondearA5(financiamientoTranscurridoBruto);
+        const totalProporcional = redondearA5(totalProporcionalBruto);
+
+        const saldoNormal = redondearA5(saldoNormalBruto);
+        const porPagar = redondearA5(porPagarBruto);
+        const descuento = redondearA5(descuentoBruto);
+
+        // Inyección de valores redondeados en la pantalla (DOM)
         document.getElementById("lblFinanciamientoTotal").innerText = formatearMoneda(financiamientoTotal);
         document.getElementById("lblFinanciamientoSemanal").innerText = formatearMoneda(finaSemanal);
         document.getElementById("lblFinanciamientoTranscurrido").innerText = formatearMoneda(financiamientoTranscurrido);
@@ -246,21 +262,21 @@
         document.getElementById("lblPorPagar").innerText = formatearMoneda(porPagar);
         document.getElementById("lblDescuento").innerText = formatearMoneda(descuento);
 
-        return { porPagar, descuento, saldoNormal };
+        return { porPagar, saldoNormal };
     }
 
-    // DOCUMENTACIÓN: Generador del mensaje con el nombre comercial actualizado de la empresa
+    // DOCUMENTACIÓN: Generador de mensaje de WhatsApp simplificado (sin el concepto de descuento)
     function enviarPropuestaWhatsApp() {
         const empresa = document.getElementById("selectEmpresa").value;
         const folio = document.getElementById("inputFolio").value || "N/A";
         const nombre = document.getElementById("inputNombre").value || "Cliente";
         const articulo = document.getElementById("inputArticulo").value || "Artículo";
-        const { porPagar, descuento, saldoNormal } = calcularLiquidacion();
+        const { porPagar, saldoNormal } = calcularLiquidacion();
 
+        // Estructura de mensaje limpia y directa para el cliente
         const mensaje = `Hola *${nombre}*, te saludamos de *${empresa}*.\n\n` +
                         `Revisamos tu crédito *N° ${folio}* por el artículo *${articulo}*:\n\n` +
                         `🔹 *Saldo normal a la fecha:* ${formatearMoneda(saldoNormal)}\n` +
-                        `🎉 *Descuento por liquidación anticipada:* ${formatearMoneda(descuento)}\n` +
                         `✅ *Monto único para liquidar hoy:* ${formatearMoneda(porPagar)}\n\n` +
                         `¿Te gustaría aprovechar este beneficio para saldar tu cuenta? Quedamos a tus órdenes.`;
 
